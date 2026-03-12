@@ -85,7 +85,22 @@
 
         const data = await response.json();
 
-        resultBox.textContent = data.output || JSON.stringify(data, null, 2);
+        document.getElementById("result").innerHTML = `
+        <b>Corporate</b><br>
+        ${data.corporate}<br><br>
+        
+        <b>Friendly</b><br>
+        ${data.friendly}<br><br>
+        
+        <b>Direct</b><br>
+        ${data.direct}<br><br>
+        
+        <b>Executive</b><br>
+        ${data.executive}<br><br>
+        
+        <b>Brutally Honest</b><br>
+        ${data.brutally_honest}
+        `;
         resultBox.style.display = "block";
       } catch (err) {
         errorBox.textContent = "Something went wrong: " + err.message;
