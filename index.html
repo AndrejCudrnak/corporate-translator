@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Corporate Translator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 760px;
+      margin: 40px auto;
+      padding: 0 16px;
+      line-height: 1.5;
+    }
+    h1 {
+      margin-bottom: 8px;
+    }
+    p {
+      color: #444;
+    }
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 12px;
+      font-size: 14px;
+      margin-top: 12px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 24px;
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      background: #fafafa;
+    }
+    .error {
+      color: #b00020;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Corporate Translator</h1>
+  <p>Paste a message and get multiple communication styles back.</p>
+
+  <textarea id="inputText" placeholder="Paste your text here..."></textarea>
+  <br />
+  <button onclick="translateText()">Translate</button>
+
+  <div id="error" class="error"></div>
+  <div id="result" class="result" style="display:none;"></div>
+
+  <script>
+    async function translateText() {
+      const text = document.getElementById("inputText").value.trim();
+      const resultBox = document.getElementById("result");
+      const errorBox = document.getElementById("error");
+
+      resultBox.style.display = "none";
+      errorBox.textContent = "";
+
+      if (!text) {
+        errorBox.textContent = "Please paste some text first.";
+        return;
+      }
+
+      try {
+        const response = await fetch("SEM_DAS_SVOJ_N8N_WEBHOOK_URL", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text })
+        });
+
+        if (!response.ok) {
+          throw new Error("Request failed with status " + response.status);
+        }
+
+        const data = await response.json();
+
+        resultBox.textContent = data.output || JSON.stringify(data, null, 2);
+        resultBox.style.display = "block";
+      } catch (err) {
+        errorBox.textContent = "Something went wrong: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
