@@ -10,60 +10,103 @@
       max-width: 760px;
       margin: 40px auto;
       padding: 0 16px;
-      line-height: 1.5;
+      color: #222;
+      background: #fff;
     }
+
     h1 {
       margin-bottom: 8px;
     }
-    p {
-      color: #444;
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 20px;
     }
+
     textarea {
       width: 100%;
       min-height: 140px;
       padding: 12px;
       font-size: 14px;
-      margin-top: 12px;
       box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      resize: vertical;
     }
+
     button {
       margin-top: 12px;
       padding: 10px 16px;
+      font-size: 14px;
       cursor: pointer;
-    }
-    .result {
-      margin-top: 24px;
-      padding: 16px;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       border-radius: 8px;
-      white-space: pre-wrap;
-      background: #fafafa;
+      background: #f5f5f5;
     }
-    .error {
+
+    button:hover {
+      background: #ececec;
+    }
+
+    #error {
       color: #b00020;
       margin-top: 12px;
+    }
+
+    #loading {
+      margin-top: 16px;
+      color: #666;
+      display: none;
+    }
+
+    #result {
+      margin-top: 24px;
+      display: none;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      background: #fafafa;
+    }
+
+    .card-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .card-text {
+      line-height: 1.5;
+      white-space: normal;
     }
   </style>
 </head>
 <body>
   <h1>Corporate Translator</h1>
-  <p>Paste a message and get multiple communication styles back.</p>
+  <p class="subtitle">Paste a message and get multiple workplace communication styles.</p>
 
   <textarea id="inputText" placeholder="Paste your text here..."></textarea>
   <br />
   <button onclick="translateText()">Translate</button>
 
-  <div id="error" class="error"></div>
-  <div id="result" class="result" style="display:none;"></div>
+  <div id="error"></div>
+  <div id="loading">Translating...</div>
+  <div id="result"></div>
 
   <script>
     async function translateText() {
       const text = document.getElementById("inputText").value.trim();
       const resultBox = document.getElementById("result");
       const errorBox = document.getElementById("error");
+      const loadingBox = document.getElementById("loading");
 
-      resultBox.style.display = "none";
       errorBox.textContent = "";
+      resultBox.style.display = "none";
+      resultBox.innerHTML = "";
+      loadingBox.style.display = "none";
 
       if (!text) {
         errorBox.textContent = "Please paste some text first.";
@@ -71,6 +114,8 @@
       }
 
       try {
+        loadingBox.style.display = "block";
+
         const response = await fetch("https://vacuumlabs.app.n8n.cloud/webhook/786b3347-c262-4c3b-b2a2-a27894eecd52", {
           method: "POST",
           headers: {
@@ -85,26 +130,48 @@
 
         const data = await response.json();
 
-        document.getElementById("result").innerHTML = `
-        <b>Corporate</b><br>
-        ${data.corporate}<br><br>
-        
-        <b>Friendly</b><br>
-        ${data.friendly}<br><br>
-        
-        <b>Direct</b><br>
-        ${data.direct}<br><br>
-        
-        <b>Executive</b><br>
-        ${data.executive}<br><br>
-        
-        <b>Brutally Honest</b><br>
-        ${data.brutally_honest}
+        resultBox.innerHTML = `
+          <div class="card">
+            <div class="card-title">Corporate</div>
+            <div class="card-text">${escapeHtml(data.corporate || "")}</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Friendly</div>
+            <div class="card-text">${escapeHtml(data.friendly || "")}</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Direct</div>
+            <div class="card-text">${escapeHtml(data.direct || "")}</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Executive</div>
+            <div class="card-text">${escapeHtml(data.executive || "")}</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Brutally Honest</div>
+            <div class="card-text">${escapeHtml(data.brutally_honest || "")}</div>
+          </div>
         `;
+
         resultBox.style.display = "block";
       } catch (err) {
         errorBox.textContent = "Something went wrong: " + err.message;
+      } finally {
+        loadingBox.style.display = "none";
       }
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
   </script>
 </body>
